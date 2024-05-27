@@ -1,11 +1,27 @@
 header {
-    background: white;
-    height: 70px;
-    width: 100%;
-    border-bottom: 1px solid #CCCCCC;
+  background: white;
+  height: 70px;
+  width: 100%;
+  border-bottom: 1px solid #cccccc;
+  display: flex;
+  align-items: center;
 }
 header .logo {
-    background: url("../images/logo.png") no-repeat;
-    left: 20px;
-    height: 100%;
+  background: url(../images/logo.png) no-repeat;
+  left: 20px;
+  height: 100%;
+  width: 150px;
+}
+
+header #api_status {
+  background-color: #cccccc;
+  margin-right: 30px;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  margin-left: auto;
+}
+
+header #api_status.available {
+  background-color: #ff545f;
 }
