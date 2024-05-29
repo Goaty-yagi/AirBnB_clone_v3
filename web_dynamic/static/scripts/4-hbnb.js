@@ -50,10 +50,15 @@ $(document).ready(function () {
         contentType: "application/json",
         data: JSON.stringify({})
       });
-
-      $('section.places').empty();
-      for (const place of data) {
+      const filteredPlaces = [];
+      data.forEach(async (place) => { // bad approach
         if (await hasAmenityByPlace(place.id)) {
+          filteredPlaces.push(place);
+        }
+      })
+      $('section.places').empty();
+      if (filteredPlaces.length) {
+        for (const place of filteredPlaces) {
           const article = $('<article>');
 
           const titleBox = $('<div>').addClass('title_box');
@@ -77,6 +82,7 @@ $(document).ready(function () {
           article.append(titleBox, information, user, description);
 
           $('section.places').append(article);
+
         }
       }
     } catch (error) {
