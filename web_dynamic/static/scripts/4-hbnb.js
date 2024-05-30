@@ -1,9 +1,62 @@
 $(document).ready(function () {
   let selectedAmenities = [];
+
+  async function renderPlaces(placesData) {
+    console.log({ placesData });
+    $("section.places").empty();
+    if (placesData.length) {
+      for (const place of placesData) {
+        const article = $("<article>");
+
+        const titleBox = $("<div>").addClass("title_box");
+        const placeName = $("<h2>").text(place.name);
+        const priceByNight = $("<div>")
+          .addClass("price_by_night")
+          .text(`$${place.price_by_night}`);
+        titleBox.append(placeName, priceByNight);
+
+        const information = $("<div>").addClass("information");
+        const maxGuest = $("<div>")
+          .addClass("max_guest")
+          .text(`${place.max_guest} Guest${place.max_guest !== 1 ? "s" : ""}`);
+        const numberRooms = $("<div>")
+          .addClass("number_rooms")
+          .text(
+            `${place.number_rooms} Bedroom${
+              place.number_rooms !== 1 ? "s" : ""
+            }`
+          );
+        const numberBathrooms = $("<div>")
+          .addClass("number_bathrooms")
+          .text(
+            `${place.number_bathrooms} Bathroom${
+              place.number_bathrooms !== 1 ? "s" : ""
+            }`
+          );
+        information.append(maxGuest, numberRooms, numberBathrooms);
+
+        const user = $("<div>").addClass("user");
+        const owner = $("<b>").text("Owner:");
+        const userData = await getUser(place.user_id);
+        user
+          .append(owner)
+          .append(` ${userData.first_name} ${userData.last_name}`);
+
+        const description = $("<div>")
+          .addClass("description")
+          .html(place.description);
+
+        article.append(titleBox, information, user, description);
+
+        $("section.places").append(article);
+      }
+    }
+  }
+
   async function getUser(id) {
     return new Promise((resolve, reject) => {
       $.ajax({
-        url: `http://0.0.0.0:5001/api/v1/users/${id}`,
+        url: `http://127.0.0.1:5001/api/v1/users/${id}`,
         type: "GET",
         contentType: "application/json",
         success: function (data) {
@@ -19,7 +72,7 @@ $(document).ready(function () {
   async function getAmenities(place_id) {
     return new Promise((resolve, reject) => {
       $.ajax({
-        url: `http://0.0.0.0:5001/api/v1/places/${place_id}/amenities`,
+        url: `http://127.0.0.1:5001/api/v1/places/${place_id}/amenities`,
         type: "GET",
         contentType: "application/json",
         success: function (data) {
@@ -35,7 +88,14 @@ $(document).ready(function () {
   async function hasAmenityByPlace(place_id) {
     try {
       const data = await getAmenities(place_id);
-      return data.some((amenity) => amenity.id in selectedAmenities);
+      // console.log({ data: data });
+      // console.log({ selectedAmenities: selectedAmenities });
+      // console.log({
+      //   returnValue: data.some((amenity) =>
+      //     selectedAmenities.includes(amenity.id)
+      //   )
+      // });
+      return data.some((amenity) => selectedAmenities.includes(amenity.id));
     } catch (error) {
       console.error(error);
       return false;
@@ -43,57 +103,27 @@ $(document).ready(function () {
   }
 
   async function placesSearch() {
+    console.log({ selectedAmenities });
     try {
       const data = await $.ajax({
-        url: "http://0.0.0.0:5001/api/v1/places_search/",
+        url: "http://127.0.0.1:5001/api/v1/places_search/",
         type: "POST",
         contentType: "application/json",
-        data: JSON.stringify({})
+        data: JSON.stringify({ amenities: selectedAmenities })
       });
-      const filteredPlaces = [];
-      data.forEach(async (place) => { // bad approach
-        if (await hasAmenityByPlace(place.id)) {
-          filteredPlaces.push(place);
-        }
-      })
-      $('section.places').empty();
-      if (filteredPlaces.length) {
-        for (const place of filteredPlaces) {
-          const article = $('<article>');
 
-          const titleBox = $('<div>').addClass('title_box');
-          const placeName = $('<h2>').text(place.name);
-          const priceByNight = $('<div>').addClass('price_by_night').text(`$${place.price_by_night}`);
-          titleBox.append(placeName, priceByNight);
-
-          const information = $('<div>').addClass('information');
-          const maxGuest = $('<div>').addClass('max_guest').text(`${place.max_guest} Guest${place.max_guest !== 1 ? 's' : ''}`);
-          const numberRooms = $('<div>').addClass('number_rooms').text(`${place.number_rooms} Bedroom${place.number_rooms !== 1 ? 's' : ''}`);
-          const numberBathrooms = $('<div>').addClass('number_bathrooms').text(`${place.number_bathrooms} Bathroom${place.number_bathrooms !== 1 ? 's' : ''}`);
-          information.append(maxGuest, numberRooms, numberBathrooms);
-
-          const user = $('<div>').addClass('user');
-          const owner = $('<b>').text('Owner:');
-          const userData = await getUser(place.user_id);
-          user.append(owner).append(` ${userData.first_name} ${userData.last_name}`);
-
-          const description = $('<div>').addClass('description').html(place.description);
-
-          article.append(titleBox, information, user, description);
-
-          $('section.places').append(article);
-
-        }
-      }
+      console.log("data length:", data.length);
+      renderPlaces(data);
     } catch (error) {
       console.error(error);
       $("#api_status").removeClass("available");
     }
   }
 
-  $('button').click(async () => {
+  $("button").click(async () => {
+    selectedAmenities = [];
     $('input[name="amenity"]:checked').each(function () {
-      let amenityId = $(this).data('id');
+      let amenityId = $(this).data("id");
       selectedAmenities.push(amenityId);
     });
 
