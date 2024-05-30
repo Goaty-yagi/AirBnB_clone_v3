@@ -139,10 +139,8 @@ def places_search():
             not states and
             not cities and
             not amenities):
-        places = storage.all(Place).values()
-        list_places = []
-        for place in places:
-            list_places.append(place.to_dict())
+        list_places = storage.all(Place).values()
+
     else:
         list_places = []
         if states:
@@ -171,6 +169,7 @@ def places_search():
 
     places = []
     for p in list_places:
+
         user = storage.get(User, p.user_id)
         d = p.to_dict()
         d["user"] = {}
