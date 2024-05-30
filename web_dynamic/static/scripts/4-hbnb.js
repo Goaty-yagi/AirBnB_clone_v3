@@ -51,48 +51,6 @@ $(document).ready(function () {
     }
   }
 
-  async function getUser(id) {
-    return new Promise((resolve, reject) => {
-      $.ajax({
-        url: `http://127.0.0.1:5001/api/v1/users/${id}`,
-        type: "GET",
-        contentType: "application/json",
-        success: function (data) {
-          resolve(data);
-        },
-        error: function () {
-          reject(new Error("couldn't get user data"));
-        }
-      });
-    });
-  }
-
-  async function getAmenities(place_id) {
-    return new Promise((resolve, reject) => {
-      $.ajax({
-        url: `http://127.0.0.1:5001/api/v1/places/${place_id}/amenities`,
-        type: "GET",
-        contentType: "application/json",
-        success: function (data) {
-          resolve(data);
-        },
-        error: function () {
-          reject(new Error("couldn't get amenities data"));
-        }
-      });
-    });
-  }
-
-  async function hasAmenityByPlace(place_id) {
-    try {
-      const data = await getAmenities(place_id);
-      return data.some((amenity) => selectedAmenities.includes(amenity.id));
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
-  }
-
   async function placesSearch() {
     try {
       const data = await $.ajax({
