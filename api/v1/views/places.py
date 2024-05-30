@@ -143,37 +143,39 @@ def places_search():
         list_places = []
         for place in places:
             list_places.append(place.to_dict())
-        return jsonify(list_places)
+    else:
+        list_places = []
+        if states:
+            states_obj = [storage.get(State, s_id) for s_id in states]
+            for state in states_obj:
+                    for city in state.cities:
+                        if city:
+                            for place in city.places:
+                                list_places.append(place)
 
-    list_places = []
-    if states:
-        states_obj = [storage.get(State, s_id) for s_id in states]
-        for state in states_obj:
-            if state:
-                for city in state.cities:
-                    if city:
-                        for place in city.places:
+        if cities:
+            city_obj = [storage.get(City, c_id) for c_id in cities]
+            for city in city_obj:
+                if city:
+                    for place in city.places:
+                        if place not in list_places:
                             list_places.append(place)
 
-    if cities:
-        city_obj = [storage.get(City, c_id) for c_id in cities]
-        for city in city_obj:
-            if city:
-                for place in city.places:
-                    if place not in list_places:
-                        list_places.append(place)
-
-    if amenities:
-        if not list_places:
-            list_places = storage.all(Place).values()
-        amenities_obj = [storage.get(Amenity, a_id) for a_id in amenities]
-        list_places = [place for place in list_places
-                       if all([am in place.amenities
-                               for am in amenities_obj])]
+        if amenities:
+            if not list_places:
+                list_places = storage.all(Place).values()
+            amenities_obj = [storage.get(Amenity, a_id) for a_id in amenities]
+            list_places = [place for place in list_places
+                        if all([am in place.amenities
+                                for am in amenities_obj])]
 
     places = []
     for p in list_places:
+        user = storage.get(User, p.user_id)
         d = p.to_dict()
+        d["user"] = {}
+        d["user"]["first_name"] = user.first_name
+        d["user"]["last_name"] = user.last_name
         d.pop('amenities', None)
         places.append(d)
 

@@ -2,7 +2,6 @@ $(document).ready(function () {
   let selectedAmenities = [];
 
   async function renderPlaces(placesData) {
-    console.log({ placesData });
     $("section.places").empty();
     if (placesData.length) {
       for (const place of placesData) {
@@ -37,10 +36,9 @@ $(document).ready(function () {
 
         const user = $("<div>").addClass("user");
         const owner = $("<b>").text("Owner:");
-        const userData = await getUser(place.user_id);
-        user
-          .append(owner)
-          .append(` ${userData.first_name} ${userData.last_name}`);
+
+        let { first_name, last_name } = place.user;
+        user.append(owner).append(` ${first_name} ${last_name}`);
 
         const description = $("<div>")
           .addClass("description")
@@ -88,13 +86,6 @@ $(document).ready(function () {
   async function hasAmenityByPlace(place_id) {
     try {
       const data = await getAmenities(place_id);
-      // console.log({ data: data });
-      // console.log({ selectedAmenities: selectedAmenities });
-      // console.log({
-      //   returnValue: data.some((amenity) =>
-      //     selectedAmenities.includes(amenity.id)
-      //   )
-      // });
       return data.some((amenity) => selectedAmenities.includes(amenity.id));
     } catch (error) {
       console.error(error);
@@ -103,7 +94,6 @@ $(document).ready(function () {
   }
 
   async function placesSearch() {
-    console.log({ selectedAmenities });
     try {
       const data = await $.ajax({
         url: "http://127.0.0.1:5001/api/v1/places_search/",
@@ -112,7 +102,6 @@ $(document).ready(function () {
         data: JSON.stringify({ amenities: selectedAmenities })
       });
 
-      console.log("data length:", data.length);
       renderPlaces(data);
     } catch (error) {
       console.error(error);
